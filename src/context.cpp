@@ -315,6 +315,7 @@ Context Context::Create()
     Context result;
     Opaque* opq = new Opaque;
     result.userData = opq;
-    esCreateWindow(*opq, "Hello Triangle", 320, 240, ES_WINDOW_RGB);
+    esCreateWindow(*opq, "Hello Triangle", 640, 480, ES_WINDOW_RGB | ES_WINDOW_DEPTH);
+    glEnable(GL_DEPTH_TEST);
     return result;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "context.h"
+#include "model.h"
 
 #include <glm/vec3.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -37,8 +38,9 @@ namespace emsg
     struct Renderable
     {
         Shader::Instance shader;
+        Model* model;
         glm::vec3 pos;
-        glm::quat rot;
+        glm::mat4 rot = glm::identity<glm::mat4>();
 
         static void Clear(const Context& ctx);
         void Draw() const;

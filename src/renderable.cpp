@@ -1,4 +1,7 @@
+#include "camera.h"
 #include "renderable.h"
+
+#include <glm/gtc/type_ptr.hpp>
 
 #include <array>
 #include <unordered_map>
@@ -152,27 +155,56 @@ void emsg::Renderable::Clear(const Context& ctx)
 {
     glViewport(0, 0, ctx.width, ctx.height);
     glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_DEPTH_BUFFER_BIT);
 }
 
 void emsg::Renderable::Draw() const
 {
-    GLfloat vVertices[] = { 0.0f,  0.5f, 0.0f,
-        -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f };
+    // VBO
+    GLuint vbo;
+    {
+        glGenBuffers(1, &vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            model->vertices.size() * sizeof(decltype(model->vertices)::value_type),
+            model->vertices.data(),
+            GL_STATIC_DRAW);
+    }
 
-    // No clientside arrays, so do this in a webgl-friendly manner
-    GLuint vertexPosObject;
-    glGenBuffers(1, &vertexPosObject);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexPosObject);
-    glBufferData(GL_ARRAY_BUFFER, 9 * 4, vVertices, GL_STATIC_DRAW);
+    // IBO
+    GLuint ibo;
+    {
+        glGenBuffers(1, &ibo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+        glBufferData(
+            GL_ELEMENT_ARRAY_BUFFER,
+            model->indices.size() * sizeof(decltype(model->indices)::value_type),
+            model->indices.data(),
+            GL_STATIC_DRAW);
+    }
+    // TODO: Move above into model
 
     // Use the program object
-    glUseProgram(reinterpret_cast<GLuint>(shader.shader->opaque));
+    GLuint programId = reinterpret_cast<GLuint>(shader.shader->opaque);
+    glUseProgram(programId);
 
-    // Load the vertex data
-    glBindBuffer(GL_ARRAY_BUFFER, vertexPosObject);
-    glVertexAttribPointer(0 /* ? */, 3, GL_FLOAT, 0, 0, 0);
+    // Load VBO
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glVertexAttribPointer(0, 3, GL_FLOAT, 0, sizeof(decltype(model->vertices)::value_type), 0);
     glEnableVertexAttribArray(0);
 
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    // Load IBO
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+
+    // Bind MVP
+    auto mvpLoc = glGetUniformLocation(programId, "uMVP");
+    if (mvpLoc != -1)
+    {
+        const glm::mat4 model = glm::translate(rot, pos);
+        const glm::mat4 mvp = g_camera.projection * g_camera.view * model;
+        glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(mvp));
+    }
+
+    glDrawElements(GL_TRIANGLES, model->indices.size(), GL_UNSIGNED_SHORT, 0);
 }
