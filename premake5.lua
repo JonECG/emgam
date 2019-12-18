@@ -1,6 +1,7 @@
 workspace "Emscripten"
 	location "build"
 	architecture "x86"
+    cppdialect "C++17"
     
 	configurations { "Debug", "Release"}
 	filter { "configurations:Debug" }
@@ -17,6 +18,9 @@ project "Game"
 	files "include/**"
 	files "src/**"
 
+    -- glm
+    includedirs "thirdparty/glm/include"
+        
 	filter { "system:windows" }
         -- GLFW
         includedirs "thirdparty/GLFW/include"
@@ -38,6 +42,11 @@ project "Game"
         
 	filter { "system:not windows" }
         targetname "Game.html"
+        if os.target() ~= "windows" then
+            postbuildcommands {
+                "{COPY} %{wks.location}/../start_pyth_server.sh %{cfg.targetdir}"
+            }
+        end
         
         -- Math
 		links { "m" }
