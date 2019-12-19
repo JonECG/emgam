@@ -31,6 +31,7 @@ void emsg::Init(const Context& ctx)
         "}                        \n",
         {});
     m = Model::CreateBox(1);
+    m.BakeBuffers();
 
     r.shader = s->Instantiate();
     r.model = &m;

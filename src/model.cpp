@@ -1,5 +1,14 @@
 #include "model.h"
 
+#if EMSCRIPTEN
+    #include <GLES2/gl2.h>
+    #include <EGL/egl.h>
+    #include <emscripten.h>
+#else
+    #include <GL/glew.h>
+    #include <GLFW/glfw3.h>
+#endif
+
 using namespace emsg;
 
 namespace
@@ -45,4 +54,29 @@ Model Model::CreateBox(float dim)
     }
 
     return m;
+}
+
+void Model::BakeBuffers()
+{
+    // VBO
+    {
+        glGenBuffers(1, &vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(
+            GL_ARRAY_BUFFER,
+            vertices.size() * sizeof(decltype(vertices)::value_type),
+            vertices.data(),
+            GL_STATIC_DRAW);
+    }
+
+    // IBO
+    {
+        glGenBuffers(1, &ibo);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+        glBufferData(
+            GL_ELEMENT_ARRAY_BUFFER,
+            indices.size() * sizeof(decltype(indices)::value_type),
+            indices.data(),
+            GL_STATIC_DRAW);
+    }
 }

@@ -160,42 +160,17 @@ void emsg::Renderable::Clear(const Context& ctx)
 
 void emsg::Renderable::Draw() const
 {
-    // VBO
-    GLuint vbo;
-    {
-        glGenBuffers(1, &vbo);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            model->vertices.size() * sizeof(decltype(model->vertices)::value_type),
-            model->vertices.data(),
-            GL_STATIC_DRAW);
-    }
-
-    // IBO
-    GLuint ibo;
-    {
-        glGenBuffers(1, &ibo);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-        glBufferData(
-            GL_ELEMENT_ARRAY_BUFFER,
-            model->indices.size() * sizeof(decltype(model->indices)::value_type),
-            model->indices.data(),
-            GL_STATIC_DRAW);
-    }
-    // TODO: Move above into model
-
     // Use the program object
     GLuint programId = reinterpret_cast<GLuint>(shader.shader->opaque);
     glUseProgram(programId);
 
     // Load VBO
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, model->vbo);
     glVertexAttribPointer(0, 3, GL_FLOAT, 0, sizeof(decltype(model->vertices)::value_type), 0);
     glEnableVertexAttribArray(0);
 
     // Load IBO
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model->ibo);
 
     // Bind MVP
     auto mvpLoc = glGetUniformLocation(programId, "uMVP");
