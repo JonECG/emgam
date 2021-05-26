@@ -22,6 +22,11 @@ project "Game"
     includedirs "thirdparty/glm/include"
         
 	filter { "system:windows" }
+        -- websocketpp
+        includedirs "thirdparty/websocketpp/include"
+        includedirs "thirdparty/asioheaders/include"
+        links "Ws2_32"
+        
         -- GLFW
         includedirs "thirdparty/GLFW/include"
         libdirs "thirdparty/GLFW/lib"
