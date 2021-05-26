@@ -22,6 +22,11 @@ project "Game"
     includedirs "thirdparty/glm/include"
         
 	filter { "system:windows" }
+        -- openssl
+        includedirs "thirdparty/openssl/include"
+        libdirs "thirdparty/openssl/lib"
+        links { "libssl", "libcrypto" }
+        
         -- websocketpp
         includedirs "thirdparty/websocketpp/include"
         includedirs "thirdparty/asioheaders/include"
