@@ -22,6 +22,9 @@ project "Game"
     includedirs "thirdparty/glm/include"
         
 	filter { "system:windows" }
+        -- emscripten (reference for code)
+        includedirs "thirdparty/emscripten-core/include"
+        
         -- openssl
         includedirs "thirdparty/openssl/include"
         libdirs "thirdparty/openssl/lib"
